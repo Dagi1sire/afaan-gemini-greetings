@@ -37,8 +37,8 @@ export async function generateLesson(level: string, lessonNumber: number): Promi
   }
 
   try {
-    // Using gemini-1.0-pro instead of gemini-1.5-pro for free API access
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${key}`, {
+    // Using gemini-2.0-flash for free API access
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
