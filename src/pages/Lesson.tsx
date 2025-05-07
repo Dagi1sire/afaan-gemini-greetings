@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -42,6 +41,48 @@ const Lesson = () => {
   const [score, setScore] = useState(0);
   const [activeTab, setActiveTab] = useState('content');
   const [apiModalOpen, setApiModalOpen] = useState(false);
+
+  const formatLessonContent = (content: string) => {
+    // Add proper paragraph formatting
+    const paragraphs = content.split('\n\n');
+    
+    return paragraphs.map((paragraph, index) => {
+      // Check if paragraph is a header (starts with # or ##)
+      if (paragraph.startsWith('# ') || paragraph.startsWith('## ')) {
+        const headerLevel = paragraph.startsWith('# ') ? 'text-2xl' : 'text-xl';
+        const headerText = paragraph.replace(/^#+ /, '');
+        return (
+          <h3 key={index} className={`${headerLevel} font-bold mt-6 mb-3`}>
+            {headerText}
+          </h3>
+        );
+      }
+      
+      // Check if paragraph is a list
+      if (paragraph.includes('\n- ') || paragraph.includes('\n* ')) {
+        const listItems = paragraph.split(/\n[*-] /).filter(Boolean);
+        return (
+          <ul key={index} className="list-disc pl-6 my-4 space-y-2">
+            {listItems.map((item, i) => (
+              <li key={i}>{item}</li>
+            ))}
+          </ul>
+        );
+      }
+      
+      // Regular paragraph
+      return (
+        <p key={index} className="mb-4">
+          {paragraph.split('\n').map((line, i) => (
+            <span key={i}>
+              {line}
+              {i < paragraph.split('\n').length - 1 && <br />}
+            </span>
+          ))}
+        </p>
+      );
+    });
+  };
 
   useEffect(() => {
     if (!lessonId) {
@@ -190,7 +231,7 @@ const Lesson = () => {
 
           <TabsContent value="content" className="p-6">
             <div className="prose max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: lessonContent.content.replace(/\n/g, '<br />') }} />
+              {formatLessonContent(lessonContent.content)}
             </div>
 
             <h2 className="text-xl font-semibold mt-8 mb-4">Vocabulary</h2>
