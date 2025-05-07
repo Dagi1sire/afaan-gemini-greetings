@@ -1,185 +1,154 @@
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { BookOpen, ArrowRight, Globe, Award, Settings } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { BookOpen, Settings, ArrowRight, Info } from 'lucide-react';
 import { useAppContext } from '@/lib/context';
 import ApiKeyModal from '@/components/ApiKeyModal';
-import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Home = () => {
   const { user, isApiKeySet } = useAppContext();
   const [apiModalOpen, setApiModalOpen] = useState(false);
-  const [showApiKeyReminder, setShowApiKeyReminder] = useState(false);
-
-  useEffect(() => {
-    // Check if API key is not set, show reminder after 1 second
-    if (!isApiKeySet) {
-      const timer = setTimeout(() => {
-        setShowApiKeyReminder(true);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [isApiKeySet]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary/20 to-white pt-16 pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-              Learn <span className="text-primary">Oromifa</span> Online
-            </h1>
-            <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-              Master the Oromo language with interactive lessons, vocabulary building, and pronunciation practice.
-            </p>
-            <div className="mt-8 flex justify-center">
-              <div className="rounded-md shadow">
-                <Button asChild size="lg" className="px-8 py-3 text-lg">
-                  <Link to="/lessons">Start Learning</Link>
-                </Button>
-              </div>
-              {!isApiKeySet && (
-                <div className="ml-3">
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    className="px-8 py-3 text-lg"
-                    onClick={() => setApiModalOpen(true)}
-                  >
-                    <Settings className="mr-2 h-5 w-5" />
-                    Set API Key
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Learn Oromifa Today</h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          Begin your journey to fluency in Afaan Oromo with our interactive lessons powered by AI.
+        </p>
+        
+        {!isApiKeySet && (
+          <Alert className="max-w-2xl mx-auto mt-8 bg-yellow-50 border-yellow-300">
+            <Info className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              To generate lessons, you need to set up your free Gemini API key first.
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
 
-      {/* API Key Reminder */}
-      {showApiKeyReminder && !isApiKeySet && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 mb-12">
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 animate-bounce-in">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <Settings className="h-5 w-5 text-yellow-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700">
-                  You need to set your Gemini API key to generate lessons.{' '}
-                  <button
-                    onClick={() => setApiModalOpen(true)}
-                    className="font-medium underline text-yellow-700 hover:text-yellow-600"
-                  >
-                    Set it now
-                  </button>
-                </p>
-              </div>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>Start Learning</CardTitle>
+            <CardDescription>Begin your Oromifa journey</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600">
+              Our structured lessons guide you from beginner to advanced level with interactive exercises.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/lessons">
+                Browse Lessons
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>API Key Setup</CardTitle>
+            <CardDescription>Connect to Google Gemini API</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600">
+              This app uses Google's Gemini API to generate lesson content. You'll need a free API key from Google to use the app.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => setApiModalOpen(true)} variant={isApiKeySet ? "outline" : "default"} className="w-full">
+              <Settings className="mr-2 h-4 w-4" />
+              {isApiKeySet ? "Update API Key" : "Set API Key"}
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Track Progress</CardTitle>
+            <CardDescription>Monitor your learning journey</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600">
+              See your completed lessons, scores, and overall language learning progress.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/progress">
+                View Progress
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+
+      {!isApiKeySet && (
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-12">
+          <h2 className="text-xl font-semibold mb-4">How to Get Your Free Gemini API Key</h2>
+          <ol className="list-decimal pl-6 space-y-3">
+            <li>Visit <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google AI Studio</a></li>
+            <li>Sign in with your Google account</li>
+            <li>Go to the API keys section (look for "Get API Key")</li>
+            <li>Create a new API key</li>
+            <li>Copy the key and paste it in the API Key settings in this app</li>
+          </ol>
+          <div className="mt-6">
+            <Button onClick={() => setApiModalOpen(true)}>
+              Set Up Your API Key
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Features */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <Card className="shadow-lg transition-transform duration-300 hover:-translate-y-1">
-              <CardContent className="p-6">
-                <div className="h-12 w-12 rounded-md bg-primary/20 flex items-center justify-center mb-4">
-                  <BookOpen className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">Structured Lessons</h3>
-                <p className="mt-2 text-base text-gray-500">
-                  Progressive lessons from beginner to advanced with grammar explanations and examples.
-                </p>
-              </CardContent>
-            </Card>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Start Your Learning Journey</h2>
+        <Button asChild variant="ghost">
+          <Link to="/lessons">View All Lessons</Link>
+        </Button>
+      </div>
 
-            <Card className="shadow-lg transition-transform duration-300 hover:-translate-y-1">
-              <CardContent className="p-6">
-                <div className="h-12 w-12 rounded-md bg-secondary/20 flex items-center justify-center mb-4">
-                  <Globe className="h-6 w-6 text-secondary" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">Cultural Context</h3>
-                <p className="mt-2 text-base text-gray-500">
-                  Learn not just the language but also about Oromo culture, traditions, and expressions.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-lg transition-transform duration-300 hover:-translate-y-1">
-              <CardContent className="p-6">
-                <div className="h-12 w-12 rounded-md bg-accent/20 flex items-center justify-center mb-4">
-                  <Award className="h-6 w-6 text-accent" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">Track Progress</h3>
-                <p className="mt-2 text-base text-gray-500">
-                  Monitor your learning journey with progress tracking, achievements, and statistics.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div className="p-6 border-b">
+          <h3 className="text-xl font-semibold">Beginner Course</h3>
+          <p className="text-gray-600 mt-1">Perfect for absolute beginners</p>
         </div>
-      </section>
-
-      {/* Getting Started Section */}
-      <section className="py-12 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">Getting Started</h2>
-            <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-500">
-              Begin your Oromifa learning journey in three simple steps
-            </p>
+        <div className="p-6">
+          <div className="grid gap-4">
+            {[1, 2, 3].map((lesson) => (
+              <div key={lesson} className="flex justify-between items-center p-4 border rounded-md hover:bg-gray-50 transition-colors">
+                <div>
+                  <h4 className="font-medium">Beginner Lesson {lesson}</h4>
+                  <p className="text-sm text-gray-500">Basic Greetings & Introductions</p>
+                </div>
+                <Button asChild size="sm" variant="outline">
+                  <Link to={`/lesson/beginner-${lesson}`}>
+                    Start
+                    <BookOpen className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            ))}
           </div>
-
-          <div className="mt-10">
-            <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
-              <div className="text-center">
-                <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary mx-auto">
-                  <span className="text-white font-bold text-lg">1</span>
-                </div>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">Set Up Your API Key</h3>
-                <p className="mt-2 text-base text-gray-500">
-                  Add your Gemini API key in the settings to enable personalized lesson generation.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary mx-auto">
-                  <span className="text-white font-bold text-lg">2</span>
-                </div>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">Choose Your Level</h3>
-                <p className="mt-2 text-base text-gray-500">
-                  Select a learning level that matches your current knowledge of Oromifa.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="flex items-center justify-center h-12 w-12 rounded-md bg-primary mx-auto">
-                  <span className="text-white font-bold text-lg">3</span>
-                </div>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">Start Learning</h3>
-                <p className="mt-2 text-base text-gray-500">
-                  Begin with your first lesson and practice consistently to make progress.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 text-center">
-            <Button asChild size="lg" className="px-8">
-              <Link to="/lessons" className="inline-flex items-center">
-                Go to Lessons
+          
+          <div className="mt-6 text-center">
+            <Button asChild variant="outline">
+              <Link to="/lessons">
+                Explore More Lessons
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
         </div>
-      </section>
-
+      </div>
+      
       <ApiKeyModal open={apiModalOpen} onOpenChange={setApiModalOpen} />
     </div>
   );

@@ -37,7 +37,8 @@ export async function generateLesson(level: string, lessonNumber: number): Promi
   }
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${key}`, {
+    // Using gemini-1.0-pro instead of gemini-1.5-pro for free API access
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${key}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,11 +74,20 @@ export async function generateLesson(level: string, lessonNumber: number): Promi
     });
 
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      const errorData = await response.json();
+      console.error("API Error:", errorData);
+      throw new Error(`API request failed: ${errorData.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
-    const jsonText = data.candidates[0].content.parts[0].text;
+    
+    // Handle different response structure
+    let jsonText;
+    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      jsonText = data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error("Unexpected API response structure");
+    }
     
     // Extract JSON from the text
     const jsonMatch = jsonText.match(/```json\n([\s\S]*)\n```/) || 
@@ -88,20 +98,32 @@ export async function generateLesson(level: string, lessonNumber: number): Promi
     try {
       lessonData = JSON.parse(jsonMatch[1] || jsonText);
     } catch (e) {
-      // If parsing fails, we'll create a simplified version
-      console.error("Failed to parse the lesson JSON", e);
-      toast.error("Failed to parse lesson data");
-      
-      lessonData = {
-        title: "Basic Oromifa Greetings",
-        content: "There was an error generating the lesson. Please try again.",
-        vocabulary: [{ word: "Nagaa", translation: "Peace/Hello", example: "Nagaa! (Hello!)" }],
-        exercises: [{ 
-          question: "How do you say 'Hello' in Oromifa?", 
-          options: ["Nagaa", "Fayyaa", "Galatoomi", "Dhiifama"],
-          correctAnswer: "Nagaa" 
-        }]
-      };
+      // If parsing fails, we'll try to clean the JSON string
+      try {
+        // Clean potential markdown or extra text from the response
+        const cleanedJson = (jsonMatch[1] || jsonText)
+          .replace(/^```json\s*/, '')
+          .replace(/\s*```$/, '')
+          .trim();
+        
+        lessonData = JSON.parse(cleanedJson);
+      } catch (cleanError) {
+        // If all parsing fails, we'll create a simplified version
+        console.error("Failed to parse the lesson JSON", e, cleanError);
+        console.log("Raw response:", jsonText);
+        toast.error("Failed to parse lesson data. The API may have returned an invalid format.");
+        
+        lessonData = {
+          title: "Basic Oromifa Greetings",
+          content: "There was an error generating the lesson. Please try again or check your API key.",
+          vocabulary: [{ word: "Nagaa", translation: "Peace/Hello", example: "Nagaa! (Hello!)" }],
+          exercises: [{ 
+            question: "How do you say 'Hello' in Oromifa?", 
+            options: ["Nagaa", "Fayyaa", "Galatoomi", "Dhiifama"],
+            correctAnswer: "Nagaa" 
+          }]
+        };
+      }
     }
     
     return lessonData;
