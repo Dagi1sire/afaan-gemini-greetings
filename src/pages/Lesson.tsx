@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppContext } from '@/lib/context';
 import { generateLesson } from '@/lib/api';
+import { formatMarkdownContent } from '@/lib/utils';
 import { BookOpen, CheckCircle, ArrowLeft, Loader2, VolumeX } from 'lucide-react';
 import { toast } from 'sonner';
 import ApiKeyModal from '@/components/ApiKeyModal';
@@ -212,7 +213,7 @@ const Lesson = () => {
 
       <div className="bg-white shadow-sm rounded-lg overflow-hidden mb-8">
         <div className="bg-primary/10 p-6">
-          <h1 className="text-2xl font-bold text-gray-900">{lessonContent.title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{lessonContent?.title}</h1>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -231,7 +232,7 @@ const Lesson = () => {
 
           <TabsContent value="content" className="p-6">
             <div className="prose max-w-none">
-              {formatLessonContent(lessonContent.content)}
+              {lessonContent && formatMarkdownContent(lessonContent.content)}
             </div>
 
             <h2 className="text-xl font-semibold mt-8 mb-4">Vocabulary</h2>
