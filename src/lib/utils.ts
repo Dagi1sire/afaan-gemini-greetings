@@ -22,6 +22,15 @@ export function formatMarkdownContent(content: string): React.ReactNode[] {
       );
     }
     
+    // Special case for sections with asterisk titles like "*Greetings:*"
+    if (paragraph.startsWith('*') && paragraph.includes('**')) {
+      const sectionTitle = paragraph.replace(/^\*|\*$/g, '').trim();
+      return React.createElement('h4', 
+        { key: index, className: 'text-lg font-semibold mt-5 mb-2 text-primary' },
+        sectionTitle
+      );
+    }
+    
     // Check if paragraph contains asterisk lists (both * and •)
     if (paragraph.trim().startsWith('*') || paragraph.trim().startsWith('•') || 
         paragraph.includes('\n*') || paragraph.includes('\n•')) {
@@ -76,9 +85,32 @@ export function formatMarkdownContent(content: string): React.ReactNode[] {
                 // Handle bold text (**text**)
                 cleanItem = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 
+                // Extract any Oromifa phrase and its translation if they exist
+                const phraseMatch = cleanItem.match(/^([^(]+)\s*\(([^)]+)\)/);
+                
+                if (phraseMatch) {
+                  const phrase = phraseMatch[1].trim();
+                  const translation = phraseMatch[2].trim();
+                  
+                  return React.createElement('li', 
+                    { key: itemIndex, className: "pb-2" },
+                    [
+                      React.createElement('div', { className: "flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1" }, [
+                        React.createElement('span', { className: "font-bold text-primary" }, phrase),
+                        React.createElement('span', { className: "text-gray-600 italic" }, `(${translation})`)
+                      ]),
+                      phraseMatch.input && phraseMatch.input.slice(phraseMatch[0].length).trim() ? 
+                        React.createElement('div', { className: "text-sm text-gray-500 mt-1" }, 
+                          phraseMatch.input.slice(phraseMatch[0].length).trim()
+                        ) : null
+                    ]
+                  );
+                }
+                
                 return React.createElement('li', 
                   { 
                     key: itemIndex,
+                    className: "pb-2",
                     dangerouslySetInnerHTML: { __html: cleanItem }
                   }
                 );
@@ -89,7 +121,7 @@ export function formatMarkdownContent(content: string): React.ReactNode[] {
       } else {
         // For simple list items
         return React.createElement('ul', 
-          { key: index, className: "list-disc pl-6 my-4 space-y-2" },
+          { key: index, className: "list-disc pl-6 my-4 space-y-3" },
           lines.map((line, i) => {
             // Remove asterisk or bullet point prefix
             let cleanItem = line.replace(/^[*•]\s*/, '');
@@ -97,15 +129,66 @@ export function formatMarkdownContent(content: string): React.ReactNode[] {
             // Handle bold text (**text**)
             cleanItem = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
+            // Extract any Oromifa phrase and its translation if they exist
+            const phraseMatch = cleanItem.match(/^([^(]+)\s*\(([^)]+)\)/);
+            
+            if (phraseMatch) {
+              const phrase = phraseMatch[1].trim();
+              const translation = phraseMatch[2].trim();
+              
+              return React.createElement('li', 
+                { key: i, className: "pb-1" },
+                [
+                  React.createElement('div', { className: "flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1" }, [
+                    React.createElement('span', { className: "font-bold text-primary" }, phrase),
+                    React.createElement('span', { className: "text-gray-600 italic" }, `(${translation})`)
+                  ]),
+                  phraseMatch.input && phraseMatch.input.slice(phraseMatch[0].length).trim() ? 
+                    React.createElement('div', { className: "text-sm text-gray-500 mt-1" }, 
+                      phraseMatch.input.slice(phraseMatch[0].length).trim()
+                    ) : null
+                ]
+              );
+            }
+            
             return React.createElement('li', 
               { 
-                key: i, 
+                key: i,
+                className: "pb-1",
                 dangerouslySetInnerHTML: { __html: cleanItem }
               }
             );
           })
         );
       }
+    }
+
+    // Handle example dialogues
+    if (paragraph.includes('Person A:') && paragraph.includes('Person B:')) {
+      const lines = paragraph.split(/(\bPerson [A-Z]:)/).filter(Boolean);
+      
+      return React.createElement('div', 
+        { key: index, className: "bg-gray-50 rounded-md p-4 border border-gray-200 my-6" },
+        [
+          React.createElement('h4', 
+            { className: "text-base font-semibold mb-3" }, 
+            "Example Dialogue:"
+          ),
+          ...lines.map((line, i) => {
+            if (line.trim().startsWith('Person')) {
+              return React.createElement('span', 
+                { key: `person-${i}`, className: "font-semibold text-primary" }, 
+                line
+              );
+            } else {
+              return React.createElement('span', 
+                { key: `text-${i}` }, 
+                line
+              );
+            }
+          })
+        ]
+      );
     }
     
     // Regular paragraph with possible bold text

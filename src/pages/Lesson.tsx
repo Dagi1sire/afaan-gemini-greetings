@@ -231,17 +231,17 @@ const Lesson = () => {
           </div>
 
           <TabsContent value="content" className="p-6">
-            <div className="prose max-w-none">
+            <div className="prose max-w-none border-b pb-8 mb-8">
               {lessonContent && formatMarkdownContent(lessonContent.content)}
             </div>
 
-            <h2 className="text-xl font-semibold mt-8 mb-4">Vocabulary</h2>
+            <h2 className="text-xl font-semibold mb-4">Vocabulary</h2>
             <div className="grid gap-4 md:grid-cols-2">
               {lessonContent.vocabulary.map((item, index) => (
-                <Card key={index}>
+                <Card key={index} className="border-l-4 border-l-primary">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center mb-2">
-                      <div className="font-bold text-lg">{item.word}</div>
+                      <div className="font-bold text-lg text-primary">{item.word}</div>
                       <Button 
                         variant="ghost" 
                         size="sm" 
@@ -251,8 +251,8 @@ const Lesson = () => {
                         <VolumeX className="h-4 w-4" />
                       </Button>
                     </div>
-                    <div className="text-gray-600">{item.translation}</div>
-                    <div className="text-sm text-gray-500 mt-2 italic">{item.example}</div>
+                    <div className="text-gray-600 italic">{item.translation}</div>
+                    <div className="text-sm text-gray-500 mt-2 bg-gray-50 p-2 rounded border-l-2 border-gray-200">{item.example}</div>
                   </CardContent>
                 </Card>
               ))}
