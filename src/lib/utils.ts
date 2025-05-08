@@ -1,12 +1,13 @@
 
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import React from "react"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatMarkdownContent(content: string) {
+export function formatMarkdownContent(content: string): React.ReactNode[] {
   // Split by paragraphs
   const paragraphs = content.split('\n\n');
   
@@ -15,10 +16,9 @@ export function formatMarkdownContent(content: string) {
     if (paragraph.startsWith('# ') || paragraph.startsWith('## ')) {
       const headerLevel = paragraph.startsWith('# ') ? 'text-2xl' : 'text-xl';
       const headerText = paragraph.replace(/^#+ /, '');
-      return (
-        <h3 key={index} className={`${headerLevel} font-bold mt-6 mb-3`}>
-          {headerText}
-        </h3>
+      return React.createElement('h3', 
+        { key: index, className: `${headerLevel} font-bold mt-6 mb-3` },
+        headerText
       );
     }
     
@@ -64,47 +64,46 @@ export function formatMarkdownContent(content: string) {
           listGroups.push(currentGroup);
         }
         
-        return (
-          <div key={index} className="space-y-2 my-4">
-            {listGroups.map((group, groupIndex) => (
-              <ul key={groupIndex} className="list-disc pl-6 space-y-1">
-                {group.map((item, itemIndex) => {
-                  // Remove asterisk or bullet point prefix
-                  let cleanItem = item.replace(/^[*•]\s*/, '');
-                  
-                  // Handle bold text (**text**)
-                  cleanItem = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                  
-                  return (
-                    <li 
-                      key={itemIndex} 
-                      dangerouslySetInnerHTML={{ __html: cleanItem }}
-                    />
-                  );
-                })}
-              </ul>
-            ))}
-          </div>
+        return React.createElement('div', 
+          { key: index, className: "space-y-2 my-4" },
+          listGroups.map((group, groupIndex) => 
+            React.createElement('ul', 
+              { key: groupIndex, className: "list-disc pl-6 space-y-1" },
+              group.map((item, itemIndex) => {
+                // Remove asterisk or bullet point prefix
+                let cleanItem = item.replace(/^[*•]\s*/, '');
+                
+                // Handle bold text (**text**)
+                cleanItem = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                return React.createElement('li', 
+                  { 
+                    key: itemIndex,
+                    dangerouslySetInnerHTML: { __html: cleanItem }
+                  }
+                );
+              })
+            )
+          )
         );
       } else {
         // For simple list items
-        return (
-          <ul key={index} className="list-disc pl-6 my-4 space-y-2">
-            {lines.map((line, i) => {
-              // Remove asterisk or bullet point prefix
-              let cleanItem = line.replace(/^[*•]\s*/, '');
-              
-              // Handle bold text (**text**)
-              cleanItem = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-              
-              return (
-                <li 
-                  key={i} 
-                  dangerouslySetInnerHTML={{ __html: cleanItem }}
-                />
-              );
-            })}
-          </ul>
+        return React.createElement('ul', 
+          { key: index, className: "list-disc pl-6 my-4 space-y-2" },
+          lines.map((line, i) => {
+            // Remove asterisk or bullet point prefix
+            let cleanItem = line.replace(/^[*•]\s*/, '');
+            
+            // Handle bold text (**text**)
+            cleanItem = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            return React.createElement('li', 
+              { 
+                key: i, 
+                dangerouslySetInnerHTML: { __html: cleanItem }
+              }
+            );
+          })
         );
       }
     }
@@ -113,8 +112,12 @@ export function formatMarkdownContent(content: string) {
     let formattedText = paragraph;
     formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
-    return (
-      <p key={index} className="mb-4" dangerouslySetInnerHTML={{ __html: formattedText }} />
+    return React.createElement('p', 
+      { 
+        key: index, 
+        className: "mb-4", 
+        dangerouslySetInnerHTML: { __html: formattedText } 
+      }
     );
   });
 }
