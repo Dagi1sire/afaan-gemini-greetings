@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppContext } from '@/lib/context';
 import { generateLesson } from '@/lib/api';
 import { formatMarkdownContent } from '@/lib/utils';
-import { BookOpen, CheckCircle, ArrowLeft, Loader2, VolumeX } from 'lucide-react';
+import { BookOpen, CheckCircle, ArrowLeft, Loader2, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ApiKeyModal from '@/components/ApiKeyModal';
 
@@ -111,7 +112,7 @@ const Lesson = () => {
   const handlePlayAudio = (text: string) => {
     toast.info("Text-to-speech functionality would play here", {
       description: `"${text}"`,
-      icon: <VolumeX />,
+      icon: <Volume2 />,
     });
     // In a real implementation, we would use the Web Speech API
     // const utterance = new SpeechSynthesisUtterance(text);
@@ -170,7 +171,7 @@ const Lesson = () => {
       </Button>
 
       <div className="bg-white shadow-sm rounded-lg overflow-hidden mb-8">
-        <div className="bg-primary/10 p-6">
+        <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-6">
           <h1 className="text-2xl font-bold text-gray-900">{lessonContent?.title}</h1>
         </div>
 
@@ -189,35 +190,42 @@ const Lesson = () => {
           </div>
 
           <TabsContent value="content" className="p-6">
-            <div className="max-w-none border-b pb-8 mb-8">
+            <div className="prose max-w-none border-b pb-8 mb-8">
               {lessonContent && formatMarkdownContent(lessonContent.content)}
             </div>
 
-            <h2 className="text-xl font-semibold mb-4 text-orange-600">Vocabulary</h2>
-            <div className="grid gap-4 md:grid-cols-2">
+            <h2 className="text-xl font-semibold mb-6 text-orange-600 border-b pb-2">Vocabulary</h2>
+            <div className="grid gap-5 md:grid-cols-2 mt-6">
               {lessonContent.vocabulary.map((item, index) => (
-                <Card key={index} className="border-l-4 border-l-orange-500">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="font-bold text-lg text-orange-600">{item.word}</div>
+                <Card key={index} className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
+                  <div className="bg-gradient-to-r from-orange-500 to-orange-400 py-3 px-4">
+                    <div className="flex justify-between items-center">
+                      <div className="font-bold text-lg text-white">{item.word}</div>
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         onClick={() => handlePlayAudio(item.word)}
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 text-white hover:bg-orange-600 hover:text-white"
                       >
-                        <VolumeX className="h-4 w-4" />
+                        <Volume2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    <div className="text-gray-600 italic">{item.translation}</div>
-                    <div className="text-sm text-gray-500 mt-2 bg-gray-50 p-2 rounded border-l-2 border-gray-200">{item.example}</div>
+                  </div>
+                  <CardContent className="p-4 bg-white">
+                    <div className="text-gray-700 font-semibold italic">{item.translation}</div>
+                    <div className="text-sm text-gray-600 mt-3 bg-gray-50 p-3 rounded-md border-l-2 border-orange-300">
+                      {item.example}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <div className="mt-8 text-center">
-              <Button onClick={() => setActiveTab('practice')} className="bg-orange-500 hover:bg-orange-600">
+            <div className="mt-10 text-center">
+              <Button 
+                onClick={() => setActiveTab('practice')} 
+                className="bg-orange-500 hover:bg-orange-600 px-6 py-5 text-lg shadow-md"
+              >
                 Start Practice
               </Button>
             </div>
@@ -250,21 +258,21 @@ const Lesson = () => {
                   Exercise {currentExerciseIndex + 1} of {lessonContent.exercises.length}
                 </div>
 
-                <Card className="mb-8">
-                  <CardHeader>
-                    <CardTitle className="text-lg">
+                <Card className="mb-8 border-orange-200 shadow-md">
+                  <CardHeader className="bg-orange-50">
+                    <CardTitle className="text-lg text-gray-800">
                       {lessonContent.exercises[currentExerciseIndex].question}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-4">
                     <div className="space-y-3">
                       {lessonContent.exercises[currentExerciseIndex].options.map((option, optionIndex) => (
                         <div 
                           key={optionIndex}
-                          className={`p-3 border rounded-md cursor-pointer transition-all ${
+                          className={`p-4 border rounded-md cursor-pointer transition-all ${
                             selectedAnswers[currentExerciseIndex] === option 
-                              ? 'border-primary bg-primary/5' 
-                              : 'hover:bg-gray-50'
+                              ? 'border-orange-500 bg-orange-50' 
+                              : 'hover:bg-gray-50 border-gray-200'
                           }`}
                           onClick={() => handleAnswerSelect(currentExerciseIndex, option)}
                         >
@@ -279,6 +287,7 @@ const Lesson = () => {
                   <Button 
                     onClick={handleNextExercise} 
                     disabled={!selectedAnswers[currentExerciseIndex]}
+                    className="bg-orange-500 hover:bg-orange-600"
                   >
                     {currentExerciseIndex < lessonContent.exercises.length - 1 ? 'Next Question' : 'Complete Lesson'}
                   </Button>
