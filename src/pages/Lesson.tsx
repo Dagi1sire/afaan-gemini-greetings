@@ -43,48 +43,6 @@ const Lesson = () => {
   const [activeTab, setActiveTab] = useState('content');
   const [apiModalOpen, setApiModalOpen] = useState(false);
 
-  const formatLessonContent = (content: string) => {
-    // Add proper paragraph formatting
-    const paragraphs = content.split('\n\n');
-    
-    return paragraphs.map((paragraph, index) => {
-      // Check if paragraph is a header (starts with # or ##)
-      if (paragraph.startsWith('# ') || paragraph.startsWith('## ')) {
-        const headerLevel = paragraph.startsWith('# ') ? 'text-2xl' : 'text-xl';
-        const headerText = paragraph.replace(/^#+ /, '');
-        return (
-          <h3 key={index} className={`${headerLevel} font-bold mt-6 mb-3`}>
-            {headerText}
-          </h3>
-        );
-      }
-      
-      // Check if paragraph is a list
-      if (paragraph.includes('\n- ') || paragraph.includes('\n* ')) {
-        const listItems = paragraph.split(/\n[*-] /).filter(Boolean);
-        return (
-          <ul key={index} className="list-disc pl-6 my-4 space-y-2">
-            {listItems.map((item, i) => (
-              <li key={i}>{item}</li>
-            ))}
-          </ul>
-        );
-      }
-      
-      // Regular paragraph
-      return (
-        <p key={index} className="mb-4">
-          {paragraph.split('\n').map((line, i) => (
-            <span key={i}>
-              {line}
-              {i < paragraph.split('\n').length - 1 && <br />}
-            </span>
-          ))}
-        </p>
-      );
-    });
-  };
-
   useEffect(() => {
     if (!lessonId) {
       navigate('/lessons');
@@ -231,17 +189,17 @@ const Lesson = () => {
           </div>
 
           <TabsContent value="content" className="p-6">
-            <div className="prose max-w-none border-b pb-8 mb-8">
+            <div className="max-w-none border-b pb-8 mb-8">
               {lessonContent && formatMarkdownContent(lessonContent.content)}
             </div>
 
-            <h2 className="text-xl font-semibold mb-4">Vocabulary</h2>
+            <h2 className="text-xl font-semibold mb-4 text-orange-600">Vocabulary</h2>
             <div className="grid gap-4 md:grid-cols-2">
               {lessonContent.vocabulary.map((item, index) => (
-                <Card key={index} className="border-l-4 border-l-primary">
+                <Card key={index} className="border-l-4 border-l-orange-500">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center mb-2">
-                      <div className="font-bold text-lg text-primary">{item.word}</div>
+                      <div className="font-bold text-lg text-orange-600">{item.word}</div>
                       <Button 
                         variant="ghost" 
                         size="sm" 
@@ -259,7 +217,7 @@ const Lesson = () => {
             </div>
 
             <div className="mt-8 text-center">
-              <Button onClick={() => setActiveTab('practice')}>
+              <Button onClick={() => setActiveTab('practice')} className="bg-orange-500 hover:bg-orange-600">
                 Start Practice
               </Button>
             </div>

@@ -12,7 +12,16 @@ export function formatMarkdownContent(content: string): React.ReactNode[] {
   const paragraphs = content.split('\n\n');
   
   return paragraphs.map((paragraph, index) => {
-    // Check if paragraph is a header (starts with # or ##)
+    // Check if paragraph is a colored section heading (starts with * and ends with *)
+    if (paragraph.startsWith('*') && paragraph.endsWith('*')) {
+      const headingText = paragraph.replace(/^\*|\*$/g, '');
+      return React.createElement('h3', 
+        { key: index, className: 'text-xl font-bold mt-8 mb-4 text-orange-500' },
+        headingText
+      );
+    }
+    
+    // Check if paragraph is a regular header (starts with # or ##)
     if (paragraph.startsWith('# ') || paragraph.startsWith('## ')) {
       const headerLevel = paragraph.startsWith('# ') ? 'text-2xl' : 'text-xl';
       const headerText = paragraph.replace(/^#+ /, '');
@@ -22,13 +31,90 @@ export function formatMarkdownContent(content: string): React.ReactNode[] {
       );
     }
     
-    // Special case for sections with asterisk titles like "*Greetings:*"
-    if (paragraph.startsWith('*') && paragraph.includes('**')) {
-      const sectionTitle = paragraph.replace(/^\*|\*$/g, '').trim();
-      return React.createElement('h4', 
-        { key: index, className: 'text-lg font-semibold mt-5 mb-2 text-primary' },
-        sectionTitle
-      );
+    // Handle phrases with double asterisks (e.g., **Akkam?**)
+    if (paragraph.includes('**')) {
+      // Create a special format for language phrases
+      // First, check if this is a full phrase pattern like "**Phrase** (Translation)"
+      const phrasePattern = /^\*\*([^*]+)\*\*\s*(\([^)]+\))?.*$/;
+      const match = paragraph.match(phrasePattern);
+      
+      if (match) {
+        // This is a phrase with possible translation and explanation
+        const phrase = match[1];
+        let translation = match[2] ? match[2] : '';
+        let explanation = '';
+        
+        // Extract any explanation that follows
+        if (match[0].length > (phrase.length + translation.length + 4)) { // 4 accounts for the ** markers
+          explanation = paragraph.substring(
+            paragraph.indexOf(translation) + translation.length
+          ).trim();
+        }
+        
+        const elements = [];
+        
+        // Create phrase element
+        elements.push(
+          React.createElement('div', { key: 'phrase', className: 'mb-2' }, [
+            React.createElement('span', { 
+              key: 'text', 
+              className: 'text-lg font-bold text-orange-500' 
+            }, phrase),
+            translation ? 
+              React.createElement('span', { 
+                key: 'translation', 
+                className: 'ml-2 text-gray-600' 
+              }, translation) : null
+          ])
+        );
+        
+        // Add explanation if present
+        if (explanation) {
+          elements.push(
+            React.createElement('p', { 
+              key: 'explanation',
+              className: 'ml-4 text-gray-700' 
+            }, explanation)
+          );
+        }
+        
+        return React.createElement('div', { key: index, className: 'mb-4' }, elements);
+      }
+      
+      // For paragraph with multiple phrases (dialogue examples)
+      const parts = [];
+      let currentText = paragraph;
+      let boldPattern = /\*\*([^*]+)\*\*/;
+      let match2;
+      let lastIndex = 0;
+      
+      while ((match2 = boldPattern.exec(currentText.substring(lastIndex)))) {
+        const beforeBold = currentText.substring(lastIndex, lastIndex + match2.index);
+        if (beforeBold) {
+          parts.push(
+            React.createElement('span', { key: `text-${parts.length}` }, beforeBold)
+          );
+        }
+        
+        parts.push(
+          React.createElement('span', { 
+            key: `bold-${parts.length}`,
+            className: 'font-bold text-orange-500'
+          }, match2[1])
+        );
+        
+        lastIndex += match2.index + match2[0].length;
+      }
+      
+      if (lastIndex < currentText.length) {
+        parts.push(
+          React.createElement('span', { 
+            key: `text-${parts.length}` 
+          }, currentText.substring(lastIndex))
+        );
+      }
+      
+      return React.createElement('p', { key: index, className: 'mb-4' }, parts);
     }
     
     // Check if paragraph contains asterisk lists (both * and •)
@@ -37,130 +123,74 @@ export function formatMarkdownContent(content: string): React.ReactNode[] {
       // Split by new lines and filter out empty lines
       const lines = paragraph.split('\n').filter(line => line.trim());
       
-      // Check if this is a nested list structure
-      const isNestedList = lines.some(line => line.trim().startsWith('*') || line.trim().startsWith('•'));
-      
-      if (isNestedList) {
-        let currentGroup: string[] = [];
-        const listGroups: string[][] = [];
-        let inSublist = false;
-        
-        lines.forEach(line => {
-          const trimmedLine = line.trim();
-          // Check if line is a main bullet point
-          if ((trimmedLine.startsWith('*') || trimmedLine.startsWith('•')) && 
-              !trimmedLine.startsWith('**') && !trimmedLine.endsWith('**')) {
-            // If we already have items, end the current group
-            if (currentGroup.length > 0) {
-              listGroups.push([...currentGroup]);
-              currentGroup = [];
-            }
-            // Start a new group with this line
-            currentGroup.push(trimmedLine);
-            inSublist = true;
-          } else if (inSublist) {
-            // Add to the current group
-            currentGroup.push(trimmedLine);
-          } else {
-            // Start a new group with this line
-            currentGroup.push(trimmedLine);
-            inSublist = true;
+      return React.createElement('ul', 
+        { key: index, className: "list-disc pl-6 my-4 space-y-2" },
+        lines.map((line, i) => {
+          // Remove asterisk or bullet point prefix
+          let cleanItem = line.replace(/^[*•]\s*/, '');
+          
+          // Extract any Oromifa phrase and its translation if they exist
+          const phraseMatch = cleanItem.match(/^([^(]+)\s*\(([^)]+)\)/);
+          
+          if (phraseMatch) {
+            const phrase = phraseMatch[1].trim();
+            const translation = phraseMatch[2].trim();
+            
+            return React.createElement('li', 
+              { key: i, className: "pb-2" },
+              [
+                React.createElement('div', { className: "flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1" }, [
+                  React.createElement('span', { className: "font-bold text-orange-500" }, phrase),
+                  React.createElement('span', { className: "text-gray-600 italic" }, `(${translation})`)
+                ]),
+                phraseMatch.input && phraseMatch.input.slice(phraseMatch[0].length).trim() ? 
+                  React.createElement('div', { className: "text-sm text-gray-700 mt-1" }, 
+                    phraseMatch.input.slice(phraseMatch[0].length).trim()
+                  ) : null
+              ]
+            );
           }
-        });
-        
-        // Add any remaining items
-        if (currentGroup.length > 0) {
-          listGroups.push(currentGroup);
-        }
-        
-        return React.createElement('div', 
-          { key: index, className: "space-y-2 my-4" },
-          listGroups.map((group, groupIndex) => 
-            React.createElement('ul', 
-              { key: groupIndex, className: "list-disc pl-6 space-y-1" },
-              group.map((item, itemIndex) => {
-                // Remove asterisk or bullet point prefix
-                let cleanItem = item.replace(/^[*•]\s*/, '');
-                
-                // Handle bold text (**text**)
-                cleanItem = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                
-                // Extract any Oromifa phrase and its translation if they exist
-                const phraseMatch = cleanItem.match(/^([^(]+)\s*\(([^)]+)\)/);
-                
-                if (phraseMatch) {
-                  const phrase = phraseMatch[1].trim();
-                  const translation = phraseMatch[2].trim();
-                  
-                  return React.createElement('li', 
-                    { key: itemIndex, className: "pb-2" },
-                    [
-                      React.createElement('div', { className: "flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1" }, [
-                        React.createElement('span', { className: "font-bold text-primary" }, phrase),
-                        React.createElement('span', { className: "text-gray-600 italic" }, `(${translation})`)
-                      ]),
-                      phraseMatch.input && phraseMatch.input.slice(phraseMatch[0].length).trim() ? 
-                        React.createElement('div', { className: "text-sm text-gray-500 mt-1" }, 
-                          phraseMatch.input.slice(phraseMatch[0].length).trim()
-                        ) : null
-                    ]
-                  );
-                }
-                
-                return React.createElement('li', 
-                  { 
-                    key: itemIndex,
-                    className: "pb-2",
-                    dangerouslySetInnerHTML: { __html: cleanItem }
-                  }
+          
+          // Handle possible bold text for non-phrase items
+          if (cleanItem.includes('**')) {
+            const parts = [];
+            let currentText = cleanItem;
+            let boldPattern = /\*\*([^*]+)\*\*/;
+            let match;
+            let lastIndex = 0;
+            
+            while ((match = boldPattern.exec(currentText.substring(lastIndex)))) {
+              const beforeBold = currentText.substring(lastIndex, lastIndex + match.index);
+              if (beforeBold) {
+                parts.push(
+                  React.createElement('span', { key: `text-${parts.length}` }, beforeBold)
                 );
-              })
-            )
-          )
-        );
-      } else {
-        // For simple list items
-        return React.createElement('ul', 
-          { key: index, className: "list-disc pl-6 my-4 space-y-3" },
-          lines.map((line, i) => {
-            // Remove asterisk or bullet point prefix
-            let cleanItem = line.replace(/^[*•]\s*/, '');
-            
-            // Handle bold text (**text**)
-            cleanItem = cleanItem.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            // Extract any Oromifa phrase and its translation if they exist
-            const phraseMatch = cleanItem.match(/^([^(]+)\s*\(([^)]+)\)/);
-            
-            if (phraseMatch) {
-              const phrase = phraseMatch[1].trim();
-              const translation = phraseMatch[2].trim();
+              }
               
-              return React.createElement('li', 
-                { key: i, className: "pb-1" },
-                [
-                  React.createElement('div', { className: "flex flex-col sm:flex-row sm:items-baseline gap-2 mb-1" }, [
-                    React.createElement('span', { className: "font-bold text-primary" }, phrase),
-                    React.createElement('span', { className: "text-gray-600 italic" }, `(${translation})`)
-                  ]),
-                  phraseMatch.input && phraseMatch.input.slice(phraseMatch[0].length).trim() ? 
-                    React.createElement('div', { className: "text-sm text-gray-500 mt-1" }, 
-                      phraseMatch.input.slice(phraseMatch[0].length).trim()
-                    ) : null
-                ]
+              parts.push(
+                React.createElement('span', { 
+                  key: `bold-${parts.length}`,
+                  className: 'font-bold text-orange-500'
+                }, match[1])
+              );
+              
+              lastIndex += match.index + match[0].length;
+            }
+            
+            if (lastIndex < currentText.length) {
+              parts.push(
+                React.createElement('span', { 
+                  key: `text-${parts.length}` 
+                }, currentText.substring(lastIndex))
               );
             }
             
-            return React.createElement('li', 
-              { 
-                key: i,
-                className: "pb-1",
-                dangerouslySetInnerHTML: { __html: cleanItem }
-              }
-            );
-          })
-        );
-      }
+            return React.createElement('li', { key: i, className: "pb-2" }, parts);
+          }
+          
+          return React.createElement('li', { key: i, className: "pb-2" }, cleanItem);
+        })
+      );
     }
 
     // Handle example dialogues
@@ -191,16 +221,7 @@ export function formatMarkdownContent(content: string): React.ReactNode[] {
       );
     }
     
-    // Regular paragraph with possible bold text
-    let formattedText = paragraph;
-    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    return React.createElement('p', 
-      { 
-        key: index, 
-        className: "mb-4", 
-        dangerouslySetInnerHTML: { __html: formattedText } 
-      }
-    );
+    // Regular paragraph
+    return React.createElement('p', { key: index, className: "mb-4" }, paragraph);
   });
 }
