@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Your Dashboard - Afaan Oromo Learning{% endblock %}
+
+{% block content %}
+  <h2>Welcome to your Dashboard, {{ user.username }}!</h2>
+
+  <p>This is where you'll see your learning progress and quick links to continue your studies.</p>
+
+  {# Placeholder for progress - will be enhanced later #}
+  <h3>Your Progress (Coming Soon):</h3>
+  <ul>
+    <li>Vocabulary items learned: [Count]</li>
+    <li>Grammar topics completed: [Count]</li>
+  </ul>
+
+  <h3>Quick Actions:</h3>
+  <ul>
+    <li><a href="{% url 'learning_modules:vocabulary_list' %}">Review Vocabulary</a></li>
+    <li><a href="{% url 'learning_modules:grammartopic_list' %}">Continue Grammar Lessons</a></li>
+    {# Link to specific uncompleted lessons can be added later #}
+  </ul>
+
+  <p><a href="{% url 'logout' %}">Log out</a></p>
+{% endblock %}

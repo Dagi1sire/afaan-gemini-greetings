@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Vocabulary List - Afaan Oromo Learning{% endblock %}
+
+{% block content %}
+  <h2>Vocabulary List</h2>
+  {% if vocabulary_items %}
+    <ul>
+      {% for item in vocabulary_items %}
+        <li>
+          <strong>{{ item.afaan_oromo_word }}</strong> - {{ item.translation_english }}
+          {% if item.category %}<small> (Category: {{ item.category }})</small>{% endif %}
+          {% if item.pronunciation_audio_url %}
+            {# Placeholder for audio player - actual player to be implemented later #}
+            <br><small>Audio: <a href="{{ item.pronunciation_audio_url }}">Listen</a></small>
+          {% endif %}
+          {% if item.example_sentence_afaan %}
+            <br><em>Example: {{ item.example_sentence_afaan }}</em>
+            {% if item.example_sentence_translation %}
+              <em>({{ item.example_sentence_translation }})</em>
+            {% endif %}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No vocabulary items found. Please check back later or add some via the admin interface!</p>
+  {% endif %}
+  {# We can add pagination controls here later if paginate_by is used in the view #}
+{% endblock %}

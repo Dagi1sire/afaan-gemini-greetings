@@ -1,0 +1,14 @@
+{# This will eventually extend a base.html from the project's template directory #}
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+  <h2>Sign Up</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sign Up</button>
+  </form>
+  <p><a href="{% url 'login' %}">Already have an account? Log in</a></p>
+{% endblock %}

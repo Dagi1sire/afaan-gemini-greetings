@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}{{ grammartopic.title }} - Grammar{% endblock %}
+
+{% block content %}
+  <h2>{{ grammartopic.title }}</h2>
+  {# The 'safe' filter is used if 'explanation' contains HTML; ensure content is trusted #}
+  <div>{{ grammartopic.explanation|safe }}</div>
+
+  <p><a href="{% url 'learning_modules:grammartopic_list' %}">&laquo; Back to Grammar Topics</a></p>
+{% endblock %}

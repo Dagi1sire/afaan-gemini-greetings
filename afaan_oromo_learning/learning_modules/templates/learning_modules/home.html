@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Afaan Oromo Learning{% endblock %}
+
+{% block content %}
+  <h2>Welcome to the Afaan Oromo Learning Platform!</h2>
+  <p>This is your starting point to learn Afaan Oromo. Browse our vocabulary lists and grammar lessons to begin your journey.</p>
+
+  {% if user.is_authenticated %}
+    <p>Hello, {{ user.username }}! Visit your <a href="{% url 'learning_modules:dashboard' %}">dashboard</a> to see your progress.</p>
+  {% else %}
+    <p>Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'learning_modules:signup' %}">sign up</a> to save your progress and access all features.</p>
+  {% endif %}
+
+  <div>
+    <h3>Quick Links:</h3>
+    <ul>
+        <li><a href="{% url 'learning_modules:vocabulary_list' %}">Browse Vocabulary</a></li>
+        <li><a href="{% url 'learning_modules:grammartopic_list' %}">Study Grammar</a></li>
+    </ul>
+  </div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Afaan Oromo Learning{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+                <h1><a href="{% url 'learning_modules:home' %}">Afaan Oromo Learning</a></h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'learning_modules:home' %}">Home</a></li>
+                    <li><a href="{% url 'learning_modules:vocabulary_list' %}">Vocabulary</a></li>
+                    <li><a href="{% url 'learning_modules:grammartopic_list' %}">Grammar</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'learning_modules:dashboard' %}">Dashboard</a></li>
+                        <li><a href="{% url 'logout' %}">Logout ({{ user.username }})</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}">Login</a></li>
+                        <li><a href="{% url 'learning_modules:signup' %}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container content">
+        {% block content %}
+        <p>Welcome to the site. Content will go here.</p>
+        {% endblock %}
+    </div>
+
+    <footer>
+        <p>Afaan Oromo Learning Platform &copy; {% now "Y" %}</p>
+    </footer>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

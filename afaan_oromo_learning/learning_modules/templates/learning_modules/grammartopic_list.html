@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Grammar Topics - Afaan Oromo Learning{% endblock %}
+
+{% block content %}
+  <h2>Grammar Topics</h2>
+  {% if grammartopics %}
+    <ul>
+      {% for topic in grammartopics %}
+        <li>
+          <a href="{% url 'learning_modules:grammartopic_detail' pk=topic.pk %}">{{ topic.title }}</a>
+          <p>Order: {{ topic.order }}</p> {# Just for info, can be removed #}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No grammar topics found. Please check back later or add some via the admin interface!</p>
+  {% endif %}
+{% endblock %}
